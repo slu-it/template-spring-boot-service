@@ -1,0 +1,52 @@
+logbook:
+  exclude:
+    - /actuator/health/**
+  format:
+    style: http
+  minimum-status: 400
+  strategy: body-only-if-status-at-least
+
+logging:
+  level:
+    root: warn
+    service: info
+    org.zalando.logbook: trace
+
+management:
+  endpoint:
+    info:
+      enabled: true
+    health:
+      enabled: true
+      show-details: when_authorized
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include:
+          - info
+          - health
+          - metrics
+
+server:
+  shutdown: graceful
+
+spring:
+  application:
+    name: spring-boot-service
+  jackson:
+    default-property-inclusion: non_null
+
+---
+spring.config.activate.on-profile: json-logging
+
+logbook:
+  format:
+    style: json
+
+logging:
+  config: classpath:logback-json.xml

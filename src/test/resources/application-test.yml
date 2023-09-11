@@ -1,0 +1,6 @@
+logbook:
+  format:
+    style: json
+
+server:
+  shutdown: immediate
