@@ -125,6 +125,10 @@ tasks {
 
 asciidoctorj {
     fatalWarnings("include file not found") // make build fail if generated files are missing
+    modules {
+        diagram.use()
+        diagram.setVersion("2.2.13")
+    }
 }
 
 detekt {
