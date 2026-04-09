@@ -4,23 +4,28 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.web.server.LocalManagementPort
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.servlet.client.RestTestClient
 
 @ActiveProfiles("test")
+@AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class ApplicationTests(
-    @Autowired val webTestClient: WebTestClient
+    @Autowired val client: RestTestClient
 ) {
 
     @Nested
-    inner class ActuatorSecurity {
+    inner class ActuatorSecurity(
+        @LocalManagementPort private val port: Int
+    ) {
 
         val publicEndpoints = setOf("/actuator/info", "/actuator/health")
         val privateEndpoints = setOf("/actuator/metrics")
@@ -51,8 +56,8 @@ class ApplicationTests(
             .map { (endpoint, status) -> dynamicTest("$endpoint >> $status") { block(endpoint, status) } }
 
         private fun assertThatBasicAuthUserReturnsStatus(path: String, status: HttpStatus, username: String? = null) =
-            webTestClient.get()
-                .uri(path)
+            client.get()
+                .uri { builder -> builder.port(port).path(path).build() }
                 .headers { if (username != null) it.setBasicAuth(username, username.reversed()) }
                 .exchange()
                 .expectStatus().isEqualTo(status)

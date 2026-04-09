@@ -1,10 +1,11 @@
 logbook:
-  exclude:
-    - /actuator/health/**
   format:
     style: http
   minimum-status: 400
   strategy: body-only-if-status-at-least
+  predicate:
+    exclude:
+      - path: /actuator/health/**
 
 logging:
   level:
@@ -15,25 +16,26 @@ logging:
 management:
   endpoint:
     info:
-      enabled: true
+      access: read_only
     health:
-      enabled: true
-      show-details: when_authorized
-      probes:
-        enabled: true
+      access: read_only
     metrics:
-      enabled: true
+      access: read_only
   endpoints:
-    enabled-by-default: false
     web:
       exposure:
         include:
           - info
           - health
           - metrics
+    access:
+      default: none
+      max-permitted: read_only
+  server:
+    port: 8081
 
 server:
-  shutdown: graceful
+  port: 8080
 
 spring:
   application:
